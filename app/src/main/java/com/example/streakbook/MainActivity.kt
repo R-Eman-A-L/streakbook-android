@@ -5,15 +5,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,7 +49,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HabitListScreen() {
     var done by remember { mutableStateOf(setOf<String>()) }
-    val habits = listOf("Read", "Gym", "Water", "Walk")
+    var habits  by remember {  mutableStateOf(listOf("Read", "Gym", "Water", "Walk"))}
+    var inputText by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,26 +63,50 @@ fun HabitListScreen() {
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            items(habits) { name ->
-                ListItem(headlineContent = { Text(text = name) }, trailingContent = {
-                    if (name in done) Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Done"
-                    )
-                }, modifier = Modifier.clickable {
-                    if (name in done) {
-                        done -= name
-                    } else {
-                        done += name
-
+        Column(Modifier.padding(innerPadding)) {
+            Row {
+                OutlinedTextField(
+                    value = inputText,
+                    onValueChange = {
+                        inputText = it
+                        error = null
+                    },
+                    label = {Text("Add Habit")},
+                    isError = error != null,
+                    supportingText = {error?.let{Text(it)}},
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = {
+                    val name = inputText.trim()
+                    when {
+                        name.isBlank() -> error = "Enter a habit name"
+                        name in habits -> error = "You already have that habit"
+                        else -> {habits += name; inputText = ""}
                     }
-                })
+                }){
+                    Icon(Icons.Default.Add, contentDescription = "Add Habit")
+                }
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                items(habits) { name ->
+                    ListItem(headlineContent = { Text(text = name) }, trailingContent = {
+                        if (name in done) Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Done"
+                        )
+                    }, modifier = Modifier.clickable {
+                        if (name in done) {
+                            done -= name
+                        } else {
+                            done += name
 
+                        }
+                    })
+
+                }
             }
         }
     }
