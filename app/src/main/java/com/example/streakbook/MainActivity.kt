@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,8 +56,17 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListScreen() {
-    var done by rememberSaveable { mutableStateOf(setOf<String>()) }
-    var habits by rememberSaveable { mutableStateOf(listOf("Read", "Gym", "Water", "Walk")) }
+    var habits by remember {
+        mutableStateOf(
+            listOf(
+                Habit(1, "Read"),
+                Habit(2, "Gym"),
+                Habit(3, "Water"),
+                Habit(4, "Walk")
+            )
+        )
+    }
+    var nextId by remember { mutableIntStateOf(5) }
     var inputText by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -86,9 +97,9 @@ fun HabitListScreen() {
                     val name = inputText.trim()
                     when {
                         name.isBlank() -> error = "Enter a habit name"
-                        name in habits -> error = "You already have that habit"
+                        habits.any { it.name == name } -> error = "You already have that habit"
                         else -> {
-                            habits += name
+                            habits += Habit(nextId++, name)
                             inputText = ""
                         }
                     }
@@ -99,7 +110,9 @@ fun HabitListScreen() {
 
             if (habits.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize().weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -111,24 +124,22 @@ fun HabitListScreen() {
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    items(habits, key = { it }) { name ->
+                    items(habits, key = { it.id }) { habit ->
                         ListItem(
-                            headlineContent = { Text(text = name) }, trailingContent = {
-                                if (name in done) Icon(
+                            headlineContent = { Text(text = habit.name) }, trailingContent = {
+                                if (habit.doneToday) Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Done"
                                 )
                             }, modifier = Modifier.combinedClickable(
                                 onClick = {
-                                    if (name in done) {
-                                        done -= name
-                                    } else {
-                                        done += name
+                                    habits = habits.map {
+                                        if (it.id == habit.id)
+                                            it.copy(doneToday = !it.doneToday) else it
                                     }
                                 },
                                 onLongClick = {
-                                    habits -= name
-                                    done -= name
+                                    habits = habits.filter { it.id != habit.id }
                                 }
                             )
                         )
