@@ -4,12 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,16 +25,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.streakbook.ui.theme.StreakBookTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,18 +51,8 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HabitListScreen() {
-    var habits by remember {
-        mutableStateOf(
-            listOf(
-                Habit(1, "Read"),
-                Habit(2, "Gym"),
-                Habit(3, "Water"),
-                Habit(4, "Walk")
-            )
-        )
-    }
-    var nextId by remember { mutableIntStateOf(5) }
+fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
+    val habits by viewModel.habits.collectAsStateWithLifecycle()
     var inputText by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -94,14 +80,11 @@ fun HabitListScreen() {
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = {
-                    val name = inputText.trim()
-                    when {
-                        name.isBlank() -> error = "Enter a habit name"
-                        habits.any { it.name == name } -> error = "You already have that habit"
-                        else -> {
-                            habits += Habit(nextId++, name)
-                            inputText = ""
-                        }
+                    val problem = viewModel.validate(inputText)
+                    if (problem != null) error = problem
+                    else {
+                        viewModel.addHabit(inputText)
+                        inputText = ""
                     }
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add Habit")
@@ -133,13 +116,10 @@ fun HabitListScreen() {
                                 )
                             }, modifier = Modifier.combinedClickable(
                                 onClick = {
-                                    habits = habits.map {
-                                        if (it.id == habit.id)
-                                            it.copy(doneToday = !it.doneToday) else it
-                                    }
+                                    viewModel.toggle(habit.id)
                                 },
                                 onLongClick = {
-                                    habits = habits.filter { it.id != habit.id }
+                                    viewModel.deleteHabit(habit.id)
                                 }
                             )
                         )
