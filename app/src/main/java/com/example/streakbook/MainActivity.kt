@@ -52,9 +52,8 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
-    val habits by viewModel.habits.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     var inputText by rememberSaveable { mutableStateOf("") }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
 
 
 
@@ -72,26 +71,24 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
                     value = inputText,
                     onValueChange = {
                         inputText = it
-                        error = null
+                        viewModel.onTextChanged()
                     },
                     label = { Text("Add Habit") },
-                    isError = error != null,
-                    supportingText = { error?.let { Text(it) } },
+                    isError = state.error != null,
+                    supportingText = { state.error?.let { Text(it) } },
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = {
-                    val problem = viewModel.validate(inputText)
-                    if (problem != null) error = problem
-                    else {
-                        viewModel.addHabit(inputText)
-                        inputText = ""
-                    }
+                    if (viewModel.onAdd(inputText)) inputText = ""
+
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add Habit")
                 }
             }
 
-            if (habits.isEmpty()) {
+            Text("${state.doneCount} of ${state.habits.size} done today")
+
+            if (state.habits.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -107,7 +104,7 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    items(habits, key = { it.id }) { habit ->
+                    items(state.habits, key = { it.id }) { habit ->
                         ListItem(
                             headlineContent = { Text(text = habit.name) }, trailingContent = {
                                 if (habit.doneToday) Icon(
@@ -116,10 +113,10 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
                                 )
                             }, modifier = Modifier.combinedClickable(
                                 onClick = {
-                                    viewModel.toggle(habit.id)
+                                    viewModel.onToggle(habit.id)
                                 },
                                 onLongClick = {
-                                    viewModel.deleteHabit(habit.id)
+                                    viewModel.onDelete(habit.id)
                                 }
                             )
                         )
