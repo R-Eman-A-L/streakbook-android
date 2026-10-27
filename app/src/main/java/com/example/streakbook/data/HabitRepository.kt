@@ -1,4 +1,6 @@
-package com.example.streakbook
+package com.example.streakbook.data
+
+import com.example.streakbook.model.Habit
 
 interface HabitRepository {
     fun getHabits() : List<Habit>

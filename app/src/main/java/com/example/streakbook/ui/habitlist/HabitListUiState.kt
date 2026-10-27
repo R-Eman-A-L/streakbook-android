@@ -1,4 +1,6 @@
-package com.example.streakbook
+package com.example.streakbook.ui.habitlist
+
+import com.example.streakbook.model.Habit
 
 data class HabitListUiState(
     val habits: List<Habit> = emptyList(),

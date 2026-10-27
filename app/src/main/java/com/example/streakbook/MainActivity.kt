@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.streakbook.ui.habitlist.HabitListScreen
+import com.example.streakbook.ui.habitlist.HabitListViewModel
 import com.example.streakbook.ui.theme.StreakBookTheme
 
 class MainActivity : ComponentActivity() {
@@ -42,98 +44,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             StreakBookTheme {
                 HabitListScreen()
-
             }
         }
     }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    var inputText by rememberSaveable { mutableStateOf("") }
-
-
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "StreakBook") }
-
-            )
-        }
-    ) { innerPadding ->
-        Column(Modifier.padding(innerPadding)) {
-            Row {
-                OutlinedTextField(
-                    value = inputText,
-                    onValueChange = {
-                        inputText = it
-                        viewModel.onTextChanged()
-                    },
-                    label = { Text("Add Habit") },
-                    isError = state.error != null,
-                    supportingText = { state.error?.let { Text(it) } },
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = {
-                    if (viewModel.onAdd(inputText)) inputText = ""
-
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Habit")
-                }
-            }
-
-            Text("${state.doneCount} of ${state.habits.size} done today")
-
-            if (state.habits.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No habits yet",
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    items(state.habits, key = { it.id }) { habit ->
-                        ListItem(
-                            headlineContent = { Text(text = habit.name) }, trailingContent = {
-                                if (habit.doneToday) Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Done"
-                                )
-                            }, modifier = Modifier.combinedClickable(
-                                onClick = {
-                                    viewModel.onToggle(habit.id)
-                                },
-                                onLongClick = {
-                                    viewModel.onDelete(habit.id)
-                                }
-                            )
-                        )
-
-                    }
-                }
-            }
-
-
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HabitListPreview() {
-    StreakBookTheme {
-        HabitListScreen()
-    }
-}

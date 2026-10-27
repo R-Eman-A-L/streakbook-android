@@ -1,4 +1,6 @@
-package com.example.streakbook
+package com.example.streakbook.data
+
+import com.example.streakbook.model.Habit
 
 class InMemoryHabitRepository : HabitRepository {
     private var habits =

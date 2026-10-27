@@ -1,6 +1,8 @@
-package com.example.streakbook
+package com.example.streakbook.ui.habitlist
 
 import androidx.lifecycle.ViewModel
+import com.example.streakbook.data.HabitRepository
+import com.example.streakbook.data.InMemoryHabitRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
