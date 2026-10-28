@@ -33,6 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.example.streakbook.ui.HabitDetailKey
+import com.example.streakbook.ui.HabitListKey
+import com.example.streakbook.ui.habitdetail.HabitDetailScreen
 import com.example.streakbook.ui.habitlist.HabitListScreen
 import com.example.streakbook.ui.habitlist.HabitListViewModel
 import com.example.streakbook.ui.theme.StreakBookTheme
@@ -43,7 +49,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             StreakBookTheme {
-                HabitListScreen()
+                val backStack = rememberNavBackStack(HabitListKey)
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = {backStack.removeLastOrNull()},
+                    entryProvider = entryProvider {
+                        entry<HabitListKey> {
+                            HabitListScreen(onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
+                        }
+                        entry<HabitDetailKey> { key ->
+                            HabitDetailScreen(habitId = key.habitId, onBack = {
+                                backStack.removeLastOrNull()
+                            })
+                        }
+                    },
+                )
             }
         }
     }

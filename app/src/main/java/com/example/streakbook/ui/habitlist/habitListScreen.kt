@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,7 +34,7 @@ import com.example.streakbook.ui.theme.StreakBookTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
+fun HabitListScreen(viewModel: HabitListViewModel = viewModel(), onOpenHabit: (Int) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var inputText by rememberSaveable { mutableStateOf("") }
 
@@ -89,13 +90,16 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
                     items(state.habits, key = { it.id }) { habit ->
                         ListItem(
                             headlineContent = { Text(text = habit.name) }, trailingContent = {
-                                if (habit.doneToday) Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Done"
+
+                                Checkbox(
+                                    checked = habit.doneToday,
+                                    onCheckedChange = {
+                                        viewModel.onToggle(habit.id)
+                                    }
                                 )
                             }, modifier = Modifier.combinedClickable(
                                 onClick = {
-                                    viewModel.onToggle(habit.id)
+                                    onOpenHabit(habit.id)
                                 },
                                 onLongClick = {
                                     viewModel.onDelete(habit.id)
@@ -116,6 +120,6 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel()) {
 @Composable
 fun HabitListPreview() {
     StreakBookTheme {
-        HabitListScreen()
+
     }
 }
