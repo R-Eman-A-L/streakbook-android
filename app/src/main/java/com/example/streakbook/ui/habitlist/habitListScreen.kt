@@ -1,5 +1,6 @@
 package com.example.streakbook.ui.habitlist
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,11 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.streakbook.data.InMemoryHabitRepository
 import com.example.streakbook.ui.theme.StreakBookTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HabitListScreen(viewModel: HabitListViewModel = viewModel(), onOpenHabit: (Int) -> Unit) {
+fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var inputText by rememberSaveable { mutableStateOf("") }
 
@@ -114,10 +116,15 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel(), onOpenHabit: (I
     }
 }
 
+// Preview only: a throwaway ViewModel is fine for a static picture.
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
 @Composable
 fun HabitListPreview() {
     StreakBookTheme {
-
+        HabitListScreen(
+            viewModel = HabitListViewModel(InMemoryHabitRepository()),
+            onOpenHabit = { }
+        )
     }
 }

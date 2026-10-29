@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class HabitDetailViewModel(
     private val habitId: Int,
-    private val repository: HabitRepository = InMemoryHabitRepository(),
+    private val repository: HabitRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HabitDetailUiState())
     val state: StateFlow<HabitDetailUiState> = _state.asStateFlow()

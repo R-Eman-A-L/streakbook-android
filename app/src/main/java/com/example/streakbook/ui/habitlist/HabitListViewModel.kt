@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class HabitListViewModel(
-    private val repository: HabitRepository = InMemoryHabitRepository()
+    private val repository: HabitRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HabitListUiState())

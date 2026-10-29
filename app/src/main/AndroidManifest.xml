@@ -10,7 +10,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".StreakBookApp"
         android:theme="@style/Theme.StreakBook">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

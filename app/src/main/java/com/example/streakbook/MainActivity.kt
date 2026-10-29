@@ -1,5 +1,6 @@
 package com.example.streakbook
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,12 +16,14 @@ import com.example.streakbook.ui.HabitListKey
 import com.example.streakbook.ui.habitdetail.HabitDetailScreen
 import com.example.streakbook.ui.habitdetail.HabitDetailViewModel
 import com.example.streakbook.ui.habitlist.HabitListScreen
+import com.example.streakbook.ui.habitlist.HabitListViewModel
 import com.example.streakbook.ui.theme.StreakBookTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val repository = (application as StreakBookApp).habitRepository
         setContent {
             StreakBookTheme {
                 val backStack = rememberNavBackStack(HabitListKey)
@@ -33,11 +36,17 @@ class MainActivity : ComponentActivity() {
                     ),
                     entryProvider = entryProvider {
                         entry<HabitListKey> {
-                            HabitListScreen(onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
+                            HabitListScreen(viewModel = viewModel { HabitListViewModel(repository = repository) },
+                                onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
                         }
                         entry<HabitDetailKey> { key ->
                             HabitDetailScreen(
-                                viewModel = viewModel { HabitDetailViewModel(habitId = key.habitId) },
+                                viewModel = viewModel {
+                                    HabitDetailViewModel(
+                                        habitId = key.habitId,
+                                        repository = repository
+                                    )
+                                },
                                 onBack = { backStack.removeLastOrNull() },
                             )
                         }
