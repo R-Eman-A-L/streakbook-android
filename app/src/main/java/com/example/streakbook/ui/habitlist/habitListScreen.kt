@@ -110,8 +110,6 @@ fun HabitListScreen(viewModel: HabitListViewModel = viewModel(), onOpenHabit: (I
                     }
                 }
             }
-
-
         }
     }
 }

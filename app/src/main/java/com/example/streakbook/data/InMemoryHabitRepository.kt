@@ -33,4 +33,8 @@ class InMemoryHabitRepository : HabitRepository {
         habits = habits.filter { it.id != id }
     }
 
+    override fun getHabit(id: Int): Habit? {
+        return habits.find { it.id == id }
+    }
+
 }

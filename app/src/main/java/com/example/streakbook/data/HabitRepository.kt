@@ -7,4 +7,5 @@ interface HabitRepository {
     fun add(name: String)
     fun toggle(id: Int)
     fun delete(id: Int)
+    fun getHabit(id: Int) : Habit?
 }
