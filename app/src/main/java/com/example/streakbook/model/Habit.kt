@@ -1,3 +1,5 @@
 package com.example.streakbook.model
 
-data class Habit(val id: Int, val name: String, val doneToday: Boolean = false)
+import java.time.LocalDate
+
+data class Habit(val id: Int, val name: String, val completedDates: Set<LocalDate> = emptySet())

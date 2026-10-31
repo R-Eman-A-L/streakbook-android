@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val repository = (application as StreakBookApp).habitRepository
+        val clock = (application as StreakBookApp).clock
         setContent {
             StreakBookTheme {
                 val backStack = rememberNavBackStack(HabitListKey)
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     entryProvider = entryProvider {
                         entry<HabitListKey> {
-                            HabitListScreen(viewModel = viewModel { HabitListViewModel(repository = repository) },
+                            HabitListScreen(viewModel = viewModel { HabitListViewModel(repository = repository, clock = clock) },
                                 onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
                         }
                         entry<HabitDetailKey> { key ->
@@ -44,7 +45,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel {
                                     HabitDetailViewModel(
                                         habitId = key.habitId,
-                                        repository = repository
+                                        repository = repository,
+                                        clock = clock
                                     )
                                 },
                                 onBack = { backStack.removeLastOrNull() },

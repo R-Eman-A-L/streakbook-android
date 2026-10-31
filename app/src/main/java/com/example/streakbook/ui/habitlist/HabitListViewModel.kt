@@ -1,6 +1,7 @@
 package com.example.streakbook.ui.habitlist
 
 import androidx.lifecycle.ViewModel
+import com.example.streakbook.data.Clock
 import com.example.streakbook.data.HabitRepository
 import com.example.streakbook.data.InMemoryHabitRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,7 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class HabitListViewModel(
-    private val repository: HabitRepository
+    private val repository: HabitRepository,
+    private val clock: Clock
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HabitListUiState())
@@ -20,12 +22,25 @@ class HabitListViewModel(
 
     private fun refresh(error: String? = null) {
         val habits = repository.getHabits()
-        val doneCount = habits.count { it.doneToday }
-        _state.value = HabitListUiState(habits = habits, doneCount = doneCount, error = error)
+        val today = clock.today()
+//        val doneTodayIds: MutableSet<Int> = mutableSetOf()
+//        habits.forEach {
+//            if (today in it.completedDates) doneTodayIds += it.id
+//        }
+
+        val doneTodayIds = habits.filter { today in it.completedDates }.map { it.id }.toSet()
+
+        _state.value = HabitListUiState(
+            habits = habits,
+            doneTodayIds = doneTodayIds,
+            doneCount = doneTodayIds.size,
+            error = error
+        )
     }
 
     fun onToggle(id: Int) {
-        repository.toggle(id)
+        val today = clock.today()
+        repository.toggle(id, today)
         refresh()
     }
 

@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.streakbook.data.InMemoryHabitRepository
+import com.example.streakbook.data.SystemClock
 import com.example.streakbook.ui.theme.StreakBookTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,7 +95,7 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
                             headlineContent = { Text(text = habit.name) }, trailingContent = {
 
                                 Checkbox(
-                                    checked = habit.doneToday,
+                                    checked = habit.id in state.doneTodayIds,
                                     onCheckedChange = {
                                         viewModel.onToggle(habit.id)
                                     }
@@ -123,7 +124,7 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
 fun HabitListPreview() {
     StreakBookTheme {
         HabitListScreen(
-            viewModel = HabitListViewModel(InMemoryHabitRepository()),
+            viewModel = HabitListViewModel(InMemoryHabitRepository(), SystemClock()),
             onOpenHabit = { }
         )
     }
