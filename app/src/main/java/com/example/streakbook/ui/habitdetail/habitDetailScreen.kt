@@ -1,28 +1,36 @@
 package com.example.streakbook.ui.habitdetail
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailScreen(viewModel: HabitDetailViewModel, onBack: () -> Unit) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -35,24 +43,38 @@ fun HabitDetailScreen(viewModel: HabitDetailViewModel, onBack: () -> Unit) {
             )
         }
     ) { innerPadding ->
-        Box {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (state.value.isNotFound) {
-                    Text(text = "Habit not found")
-                } else {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(text = "${state.value.habitName}")
-                        Text(text = "The status of the habit is: ${if (state.value.doneToday) "Done today ✓" else "Not done yet"}")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (state.isNotFound) {
+                Text(text = "Habit not found")
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(text = state.habitName ?: "")
+                    Text(text = "The status of the habit is: ${if (state.doneToday) "Done today ✓" else "Not done yet"}")
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.last7Days.forEach { done ->
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (done) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                            )
+                        }
                     }
 
+                    Text(text = if (state.currentStreak > 0) "\uD83D\uDD25 ${state.currentStreak}-day streak" else "No streak yet")
                 }
+
             }
         }
     }
