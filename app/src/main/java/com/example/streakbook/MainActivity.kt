@@ -1,10 +1,10 @@
 package com.example.streakbook
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -18,6 +18,7 @@ import com.example.streakbook.ui.habitdetail.HabitDetailViewModel
 import com.example.streakbook.ui.habitlist.HabitListScreen
 import com.example.streakbook.ui.habitlist.HabitListViewModel
 import com.example.streakbook.ui.theme.StreakBookTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,36 +26,47 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val repository = (application as StreakBookApp).habitRepository
         val clock = (application as StreakBookApp).clock
-        setContent {
-            StreakBookTheme {
-                val backStack = rememberNavBackStack(HabitListKey)
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                    entryProvider = entryProvider {
-                        entry<HabitListKey> {
-                            HabitListScreen(viewModel = viewModel { HabitListViewModel(repository = repository, clock = clock) },
-                                onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
-                        }
-                        entry<HabitDetailKey> { key ->
-                            HabitDetailScreen(
-                                viewModel = viewModel {
-                                    HabitDetailViewModel(
-                                        habitId = key.habitId,
-                                        repository = repository,
-                                        clock = clock
-                                    )
-                                },
-                                onBack = { backStack.removeLastOrNull() },
-                            )
-                        }
-                    },
-                )
+
+        lifecycleScope.launch {
+            repository.load()
+            setContent {
+                StreakBookTheme {
+                    val backStack = rememberNavBackStack(HabitListKey)
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = { backStack.removeLastOrNull() },
+                        entryDecorators = listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator(),
+                        ),
+                        entryProvider = entryProvider {
+                            entry<HabitListKey> {
+                                HabitListScreen(
+                                    viewModel = viewModel {
+                                        HabitListViewModel(
+                                            repository = repository,
+                                            clock = clock
+                                        )
+                                    },
+                                    onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
+                            }
+                            entry<HabitDetailKey> { key ->
+                                HabitDetailScreen(
+                                    viewModel = viewModel {
+                                        HabitDetailViewModel(
+                                            habitId = key.habitId,
+                                            repository = repository,
+                                            clock = clock
+                                        )
+                                    },
+                                    onBack = { backStack.removeLastOrNull() },
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
+
     }
 }
