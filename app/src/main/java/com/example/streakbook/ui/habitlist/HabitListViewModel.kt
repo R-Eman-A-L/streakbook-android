@@ -1,41 +1,69 @@
 package com.example.streakbook.ui.habitlist
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.streakbook.data.Clock
 import com.example.streakbook.data.HabitRepository
-import com.example.streakbook.data.InMemoryHabitRepository
+import com.example.streakbook.data.QuoteRepository
+import com.example.streakbook.model.Quote
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HabitListViewModel(
     private val repository: HabitRepository,
-    private val clock: Clock
+    private val clock: Clock,
+    private val quoteRepository: QuoteRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HabitListUiState())
     val state: StateFlow<HabitListUiState> = _state.asStateFlow()
 
     init {
+        loadQuote()
         refresh()
     }
 
     private fun refresh(error: String? = null) {
         val habits = repository.getHabits()
         val today = clock.today()
-//        val doneTodayIds: MutableSet<Int> = mutableSetOf()
-//        habits.forEach {
-//            if (today in it.completedDates) doneTodayIds += it.id
-//        }
 
         val doneTodayIds = habits.filter { today in it.completedDates }.map { it.id }.toSet()
 
-        _state.value = HabitListUiState(
-            habits = habits,
-            doneTodayIds = doneTodayIds,
-            doneCount = doneTodayIds.size,
-            error = error
-        )
+        _state.update{
+            it.copy(
+                habits = habits,
+                doneTodayIds = doneTodayIds,
+                doneCount = doneTodayIds.size,
+                error = error,
+                quote = _state.value.quote
+            )
+        }
+
+    }
+
+    private fun loadQuote(){
+        _state.update { it.copy(quote = QuoteState.Loading) }
+
+        viewModelScope.launch {
+            try {
+                val quote = quoteRepository.getQuote()
+                _state.update { it.copy(quote = QuoteState.Success(quote)) }
+            }catch (e: CancellationException){
+                throw e
+            } catch (e: Exception){
+                Log.e("Quote", "Quote failed", e)
+                _state.update { it.copy(quote = QuoteState.Error("Couldn't load the quote")) }
+            }
+        }
+    }
+
+    fun onRetryQuote() {
+        loadQuote()
     }
 
     fun onToggle(id: Int) {

@@ -38,6 +38,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
     implementation("androidx.datastore:datastore-preferences:1.3.0")
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.navigation3.ui)

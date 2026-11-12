@@ -1,5 +1,6 @@
 package com.example.streakbook.ui.habitlist
 
+import QuoteCard
 import android.annotation.SuppressLint
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -31,7 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.streakbook.data.FakeQuoteRepository
 import com.example.streakbook.data.InMemoryHabitRepository
+import com.example.streakbook.data.NetworkQuoteRepository
 import com.example.streakbook.data.SystemClock
 import com.example.streakbook.ui.theme.StreakBookTheme
 
@@ -52,6 +55,9 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
         }
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {
+
+            QuoteCard(state = state.quote, onRetry = {viewModel.onRetryQuote()})
+
             Row {
                 OutlinedTextField(
                     value = inputText,
@@ -124,7 +130,9 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
 fun HabitListPreview() {
     StreakBookTheme {
         HabitListScreen(
-            viewModel = HabitListViewModel(InMemoryHabitRepository(), SystemClock()),
+            viewModel = HabitListViewModel(InMemoryHabitRepository(), SystemClock(),
+                FakeQuoteRepository()),
+
             onOpenHabit = { }
         )
     }

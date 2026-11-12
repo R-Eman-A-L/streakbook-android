@@ -11,6 +11,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.streakbook.data.FakeQuoteRepository
 import com.example.streakbook.ui.HabitDetailKey
 import com.example.streakbook.ui.HabitListKey
 import com.example.streakbook.ui.habitdetail.HabitDetailScreen
@@ -24,8 +25,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val repository = (application as StreakBookApp).habitRepository
-        val clock = (application as StreakBookApp).clock
+        val app = application as StreakBookApp
+        val repository = app.habitRepository
+        val clock = app.clock
+        val quoteRepository = app.quoteRepository
 
         lifecycleScope.launch {
             repository.load()
@@ -45,7 +48,8 @@ class MainActivity : ComponentActivity() {
                                     viewModel = viewModel {
                                         HabitListViewModel(
                                             repository = repository,
-                                            clock = clock
+                                            clock = clock,
+                                            quoteRepository = quoteRepository
                                         )
                                     },
                                     onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })

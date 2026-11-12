@@ -6,5 +6,6 @@ data class HabitListUiState(
     val habits: List<Habit> = emptyList(),
     val doneCount: Int = 0,
     val doneTodayIds: Set<Int> = emptySet(),
-    val error: String? = null
+    val error: String? = null,
+    val quote: QuoteState = QuoteState.Loading,
 )
