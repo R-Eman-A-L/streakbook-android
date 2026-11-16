@@ -6,6 +6,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
 // ===== 4. STEPS: NetworkQuoteRepository.getQuote() =====
@@ -18,8 +20,8 @@ import kotlinx.serialization.json.Json
 //   5. give back the Quote
 // Throw by themselves, no step from me: no reply (no internet, timeout), unreadable body.
 
-
-class NetworkQuoteRepository(private val client: HttpClient) : QuoteRepository {
+@Singleton
+class NetworkQuoteRepository @Inject constructor(private val client: HttpClient) : QuoteRepository {
     override suspend fun getQuote(): Quote {
         val response = client.get("https://dummyjson.com/quotes/random")
 

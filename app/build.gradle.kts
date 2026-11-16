@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -29,8 +31,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -38,6 +40,9 @@ android {
 }
 
 dependencies {
+    implementation(libs.hilt.android)                          // Hilt itself, inside the app
+    ksp(libs.hilt.android.compiler)                            // Hilt's checker/writer, runs DURING the build
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)   // hiltViewModel()
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation("androidx.datastore:datastore-preferences:1.3.0")

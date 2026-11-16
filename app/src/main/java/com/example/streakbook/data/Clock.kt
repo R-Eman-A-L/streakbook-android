@@ -1,12 +1,14 @@
 package com.example.streakbook.data
 
 import java.time.LocalDate
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface Clock {
     fun today(): LocalDate
 }
-
-class SystemClock: Clock {
+@Singleton
+class SystemClock @Inject constructor(): Clock {
     override fun today(): LocalDate = LocalDate.now()
 }
 

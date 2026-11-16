@@ -4,34 +4,33 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.streakbook.data.FakeQuoteRepository
+import com.example.streakbook.data.SavedHabitRepository
 import com.example.streakbook.ui.HabitDetailKey
 import com.example.streakbook.ui.HabitListKey
 import com.example.streakbook.ui.habitdetail.HabitDetailScreen
 import com.example.streakbook.ui.habitdetail.HabitDetailViewModel
 import com.example.streakbook.ui.habitlist.HabitListScreen
-import com.example.streakbook.ui.habitlist.HabitListViewModel
 import com.example.streakbook.ui.theme.StreakBookTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var habitRepository: SavedHabitRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val app = application as StreakBookApp
-        val repository = app.habitRepository
-        val clock = app.clock
-        val quoteRepository = app.quoteRepository
-
         lifecycleScope.launch {
-            repository.load()
+            habitRepository.load()
             setContent {
                 StreakBookTheme {
                     val backStack = rememberNavBackStack(HabitListKey)
@@ -45,24 +44,14 @@ class MainActivity : ComponentActivity() {
                         entryProvider = entryProvider {
                             entry<HabitListKey> {
                                 HabitListScreen(
-                                    viewModel = viewModel {
-                                        HabitListViewModel(
-                                            repository = repository,
-                                            clock = clock,
-                                            quoteRepository = quoteRepository
-                                        )
-                                    },
+                                    viewModel = hiltViewModel(),
                                     onOpenHabit = { id -> backStack.add(HabitDetailKey(id)) })
                             }
                             entry<HabitDetailKey> { key ->
                                 HabitDetailScreen(
-                                    viewModel = viewModel {
-                                        HabitDetailViewModel(
-                                            habitId = key.habitId,
-                                            repository = repository,
-                                            clock = clock
-                                        )
-                                    },
+                                    viewModel = hiltViewModel<HabitDetailViewModel, HabitDetailViewModel.Factory>(
+                                        creationCallback = { factory -> factory.create(key.habitId)}
+                                    ),
                                     onBack = { backStack.removeLastOrNull() },
                                 )
                             }

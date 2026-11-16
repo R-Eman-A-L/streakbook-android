@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
+import javax.inject.Inject
+import javax.inject.Singleton
 
 // ===== 3. PLAN: SavedHabitRepository =====
 // What InMemoryHabitRepository keeps (its fields): the habit list, nextId
@@ -48,8 +50,8 @@ import java.time.LocalDate
 // Android: load() (suspend) does the "when the app starts" part, called from MainActivity
 //   in lifecycleScope before setContent; guard: already loaded → stop (rotation).
 // save() writes both pages in ONE store.edit, on a ticket in appScope (from StreakBookApp).
-
-class SavedHabitRepository(
+@Singleton
+class SavedHabitRepository @Inject constructor(
     private val store: DataStore<Preferences>,
     private val appScope: CoroutineScope,
 ) : HabitRepository {

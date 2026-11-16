@@ -7,14 +7,17 @@ import com.example.streakbook.data.Clock
 import com.example.streakbook.data.HabitRepository
 import com.example.streakbook.data.QuoteRepository
 import com.example.streakbook.model.Quote
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HabitListViewModel(
+@HiltViewModel
+class HabitListViewModel @Inject constructor(
     private val repository: HabitRepository,
     private val clock: Clock,
     private val quoteRepository: QuoteRepository,

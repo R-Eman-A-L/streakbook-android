@@ -3,16 +3,27 @@ package com.example.streakbook.ui.habitdetail
 import androidx.lifecycle.ViewModel
 import com.example.streakbook.data.Clock
 import com.example.streakbook.data.HabitRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
+import javax.inject.Inject
 
-class HabitDetailViewModel(
-    private val habitId: Int,
+@HiltViewModel(assistedFactory = HabitDetailViewModel.Factory::class)
+class HabitDetailViewModel @AssistedInject constructor(
+    @Assisted val habitId: Int,
     private val repository: HabitRepository,
     private val clock: Clock
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(habitId: Int): HabitDetailViewModel
+    }
     private val _state = MutableStateFlow(HabitDetailUiState())
     val state: StateFlow<HabitDetailUiState> = _state.asStateFlow()
 
