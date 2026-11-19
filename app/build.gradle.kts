@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.hilt.android)                          // Hilt itself, inside the app
     ksp(libs.hilt.android.compiler)                            // Hilt's checker/writer, runs DURING the build
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)   // hiltViewModel()

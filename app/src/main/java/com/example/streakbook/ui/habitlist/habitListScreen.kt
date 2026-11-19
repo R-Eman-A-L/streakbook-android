@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.streakbook.data.FakeLogger
 import com.example.streakbook.data.FakeQuoteRepository
 import com.example.streakbook.data.InMemoryHabitRepository
 import com.example.streakbook.data.NetworkQuoteRepository
@@ -131,7 +132,7 @@ fun HabitListPreview() {
     StreakBookTheme {
         HabitListScreen(
             viewModel = HabitListViewModel(InMemoryHabitRepository(), SystemClock(),
-                FakeQuoteRepository()),
+                FakeQuoteRepository(),FakeLogger()),
 
             onOpenHabit = { }
         )

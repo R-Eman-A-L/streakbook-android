@@ -1,12 +1,11 @@
 package com.example.streakbook.ui.habitlist
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.streakbook.data.AppLogger
 import com.example.streakbook.data.Clock
 import com.example.streakbook.data.HabitRepository
 import com.example.streakbook.data.QuoteRepository
-import com.example.streakbook.model.Quote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +20,7 @@ class HabitListViewModel @Inject constructor(
     private val repository: HabitRepository,
     private val clock: Clock,
     private val quoteRepository: QuoteRepository,
+    private val logger: AppLogger
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HabitListUiState())
@@ -37,29 +37,28 @@ class HabitListViewModel @Inject constructor(
 
         val doneTodayIds = habits.filter { today in it.completedDates }.map { it.id }.toSet()
 
-        _state.update{
+        _state.update {
             it.copy(
                 habits = habits,
                 doneTodayIds = doneTodayIds,
                 doneCount = doneTodayIds.size,
                 error = error,
-                quote = _state.value.quote
             )
         }
 
     }
 
-    private fun loadQuote(){
+    private fun loadQuote() {
         _state.update { it.copy(quote = QuoteState.Loading) }
 
         viewModelScope.launch {
             try {
                 val quote = quoteRepository.getQuote()
                 _state.update { it.copy(quote = QuoteState.Success(quote)) }
-            }catch (e: CancellationException){
+            } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception){
-                Log.e("Quote", "Quote failed", e)
+            } catch (e: Exception) {
+                logger.error("Quote", "Quote failed", e)
                 _state.update { it.copy(quote = QuoteState.Error("Couldn't load the quote")) }
             }
         }
@@ -81,12 +80,13 @@ class HabitListViewModel @Inject constructor(
     }
 
     fun onAdd(name: String): Boolean {
-        val problem = validate(name)
+        val trimmedName = name.trim()
+        val problem = validate(trimmedName)
         if (problem != null) {
             refresh(problem)
             return false
         }
-        repository.add(name)
+        repository.add(trimmedName)
         refresh()
         return true
     }
@@ -95,13 +95,10 @@ class HabitListViewModel @Inject constructor(
         _state.value = _state.value.copy(error = null)
     }
 
-    private fun validate(value: String): String? {
-        val name = value.trim()
-        return when {
-            name.isBlank() -> "Enter a habit name"
-            repository.getHabits().any { it.name == name } -> "You already have that habit"
-            else -> null
-        }
+    private fun validate(name: String): String? = when {
+        name.isEmpty() -> "Enter a habit name"
+        repository.getHabits().any { it.name == name } -> "You already have that habit"
+        else -> null
     }
 
 }

@@ -62,7 +62,7 @@ class SavedHabitRepository @Inject constructor(
 
     override fun add(name: String) {
         val id = nextId++
-        habits = habits + Habit(id, name.trim())
+        habits = habits + Habit(id, name)
         save()
     }
 

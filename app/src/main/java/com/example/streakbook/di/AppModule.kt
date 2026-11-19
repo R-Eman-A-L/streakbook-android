@@ -3,6 +3,8 @@ package com.example.streakbook.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.example.streakbook.data.AndroidLogger
+import com.example.streakbook.data.AppLogger
 import com.example.streakbook.data.Clock
 import com.example.streakbook.data.HabitRepository
 import com.example.streakbook.data.NetworkQuoteRepository
@@ -48,4 +50,5 @@ abstract class BindingsModule {
     @Binds abstract fun bindClock(impl: SystemClock): Clock
     @Binds abstract fun bindQuoteRepository(impl: NetworkQuoteRepository): QuoteRepository
     @Binds abstract fun bindHabitRepository(impl: SavedHabitRepository): HabitRepository
+    @Binds abstract fun bindAppLogger(impl: AndroidLogger): AppLogger
 }
