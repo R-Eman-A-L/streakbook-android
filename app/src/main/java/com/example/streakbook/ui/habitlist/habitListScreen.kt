@@ -29,7 +29,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.streakbook.data.FakeLogger
@@ -41,7 +43,7 @@ import com.example.streakbook.ui.theme.StreakBookTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
+fun HabitListScreen(viewModel: HabitListViewModel = hiltViewModel(), onOpenHabit: (Int) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var inputText by rememberSaveable { mutableStateOf("") }
 
@@ -57,7 +59,7 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {
 
-            QuoteCard(state = state.quote, onRetry = {viewModel.onRetryQuote()})
+            QuoteCard(state = state.quote, onRetry = { viewModel.onRetryQuote() })
 
             Row {
                 OutlinedTextField(
@@ -105,7 +107,9 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
                                     checked = habit.id in state.doneTodayIds,
                                     onCheckedChange = {
                                         viewModel.onToggle(habit.id)
-                                    }
+                                    },
+                                    modifier = Modifier.testTag("check-${habit.id}")
+
                                 )
                             }, modifier = Modifier.combinedClickable(
                                 onClick = {
@@ -131,8 +135,10 @@ fun HabitListScreen(viewModel: HabitListViewModel, onOpenHabit: (Int) -> Unit) {
 fun HabitListPreview() {
     StreakBookTheme {
         HabitListScreen(
-            viewModel = HabitListViewModel(InMemoryHabitRepository(), SystemClock(),
-                FakeQuoteRepository(),FakeLogger()),
+            viewModel = HabitListViewModel(
+                InMemoryHabitRepository(), SystemClock(),
+                FakeQuoteRepository(), FakeLogger()
+            ),
 
             onOpenHabit = { }
         )
